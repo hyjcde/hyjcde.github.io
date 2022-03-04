@@ -3,9 +3,9 @@ layout: post
 read_time: true
 show_date: true
 title:  Database Review 1
-date:   2022-03-03 13:32:20 +0800
+date:   2022-03-03 16:32:20 +0800
 description: A brief review to database.
-img: posts/20210125/20220304/db1.jpg
+img: posts/20210125/20220304/db2.jpg
 tags: [machine learning, coding, neural networks]
 author: Hyjcde
 github:  amaynez/Perceptron/
