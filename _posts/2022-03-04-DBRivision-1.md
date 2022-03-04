@@ -6,9 +6,9 @@ title:  Database Review 1
 date:   2022-03-03 16:32:20 +0800
 description: A brief review to database.
 img: posts/20210125/20220304/db2.jpg
-tags: [machine learning, coding, neural networks]
+tags: [database, coding]
 author: Hyjcde
-github:  amaynez/Perceptron/
+github:  hyjcde/database-reviews/blob/main/DBRivision-1.md
 mathjax: yes
 ---
 
