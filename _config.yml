@@ -5,8 +5,8 @@ permalink: ':title:output_ext'
 baseurl: "/hyjcde.github.io" # the subpath of your site, e.g. /blog
 url: "https://hyjcde.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 logo: "/assets/img/branding/MVM-logo-full.svg"
-logo-icon: "/assets/img/branding/MVM-symbol.svg"
-logo-icon-SEO: "/assets/img/branding/MVM-symbol-black.png" # must be a non SVG file
+logo-icon: "/assets/img/branding/hyjcde-symbol.png"
+logo-icon-SEO: "/assets/img/branding/hyjcde-symbol.png" # must be a non SVG file
 
 # Night/Dark mode
 # Default mode is "auto", "auto" is for auto nightshift
