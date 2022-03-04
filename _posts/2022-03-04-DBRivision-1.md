@@ -10,6 +10,7 @@ tags: [database, coding]
 author: Hyjcde
 github:  hyjcde/database-reviews/blob/main/DBRivision-1.md
 mathjax: yes
+toc: yes
 ---
 
 
@@ -19,7 +20,6 @@ mathjax: yes
 
 
 
-[toc]
 
 ### 概念模型及其作用
 

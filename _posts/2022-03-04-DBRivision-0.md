@@ -10,14 +10,12 @@ tags: [database, coding]
 author: Hyjcde
 github:  hyjcde/database-reviews/blob/main/DBRivision-0.md
 mathjax: yes
+toc: yes
 ---
 
 
 # DBRiview-0 数据、数据库
 
-
-
-[toc]
 
 
 
