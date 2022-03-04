@@ -1,3 +1,19 @@
+---
+layout: post
+read_time: true
+show_date: true
+title:  Database Review 0
+date:   2022-03-03 13:32:20 +0800
+description: A brief review to database.
+img: posts/20210125/Perceptron.jpg
+tags: [machine learning, coding, neural networks]
+author: Hyjcde
+github:  amaynez/Perceptron/
+mathjax: yes
+---
+
+
+
 # DBRiview-1 数据模型
 
 
