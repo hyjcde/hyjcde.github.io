@@ -5,7 +5,7 @@ show_date: true
 title:  Database Review 1
 date:   2022-03-03 16:32:20 +0800
 description: A brief review to database.
-img: posts/20220304/db1.jpg
+img: posts/20220304/db0.jpg
 tags: [database, coding]
 author: Hyjcde
 github:  hyjcde/database-reviews/blob/main/DBRivision-1.md
