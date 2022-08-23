@@ -11,331 +11,187 @@ author: Armando Maynez
 github:  amaynez/Perceptron/
 mathjax: yes
 ---
-##  Visual Odometry技术 （Of VSLAM)
+### Application of Deep Learning in Visual Odometry: A Brief Literature Review
 
+### Abstract
 
+**—Visual odometry is a technique for estimating camera egomotion based on continuous frame images and has important applications in areas such as UAV navigation and augmented reality. Traditional visual odometry mainly applies geometry-based methods, enabling near real-time applications on drones and robots. However, the classical methods have limited applications in challenging cases due to problems such as sensitivity to scene illumination and difficulty in detecting dynamic environments. With the booming development of deep learning in recent years, related techniques combined with visual odometry have emerged as a viable complement, but the current review still focuses on the traditional methods. Therefore, in this paper, we review the classical development of visual odometry to highlight the progress of deep learning incorporating or improving VO traditional methods in recent years and discuss possible current issues and trends.\****
 
-[toc]
+### I. Introduction
 
-### 什么是SLAM
+Visual odometry is a technique that estimates the camera pose without a priori knowledge by detecting the motion of the surrounding environment. In contrast to VSLAM, which focuses on global consistency, VO focuses mainly on the consistency of local trajectories. The term was coined by D. Nister because vision-based localization is similar to wheel odometry in that it incrementally estimates the motion of a vehicle by integrating the number of turns of its wheels over time[1].
 
-​		SLAM是Simultaneous localization and mapping缩写，意为“同步定位与建图”[^1]。它是指搭载了特定传感器的主体，如机器人或者无人机等，在**没有**关于环境的**先验**知识的情况下，在运动的过程中建立环境的模型。SLAM的概念早在1986年[^2]就提出了。然而，早期的SLAM往往依赖价格昂贵或专门定制的传感器，例如激光雷达，声呐或立体相机，这项技术并未走入市场。随着算法和算力的不断发展，廉价的相机逐渐成为一种取代激光雷达等复杂设备进行SLAM的可能 。那么，如果涉及到的传感器主要为相机，那么就称为“视觉(Visual)SLAM”， 也就是标题所叙述的、这篇博客主要探讨的VSLAM。
+Since it was first proposed by D. Nister et al.[2] Since 204, visual odometry has played an important role in many aspects, such as augmented and visual reality, Mars rover exploration, autonomous driving, and navigation of drones. However, these clear methods need another angle of enhancement due to the poor robustness of traditional geometry-based methods in the presence of large differences in illumination and drastic changes in environmental dynamics. With the advancement and development of neural networks and deep learning, the traditional way of using geometric methods in visual mapping has been aided by sophisticated, implicit but more effective deep learning efforts due to their superior performance in vision-related tasks. Considering the cost of training and storing models for these networks, integrating AI-VSLAM with UAVs is a challenge.
 
+In this paper, we will review the outstanding contributions of traditional methods in VO and free up more space for an in-depth discussion of highly promising deep learning methods in the VO domain. In contrast to SLAM, in which we are only concerned with the local consistency of trajectories, local maps are used to obtain more accurate estimates of local trajectories (e.g., in bundle adjustment), while SLAM is concerned with the consistency of global maps. This paper is organized as follows. Section II shows some relevant reviews and surveys. Section III provides a brief review of the main previous contributions of DeepVO. Section IV outlines the mainstream ways of combining deep learning and VO. Section V discusses the current potential and challenges of using deep learning as a recognizer at a relatively low cost. The last section summarizes our survey and evaluation.
 
+### I. Related Works
 
-### 经典视觉SLAM框架
+Because of the close connection between visual odometry and SLAM technology, VO is often part of SLAM reviews, and there are few reviews specifically on visual odometry compared to SLAM technology. Early classic reviews on VO include a series of tutorials presented by D. Scaramuzza et al[3]. Also, in presenting the development of VO, researchers focused mainly on traditional approaches. Even after 2016, when deep learning has become very popular, reviews and reviews are still scarce, despite the progress made in recent years in visual odometry methods incorporating deep learning.
 
-如图1所示，下面是经典视觉SLAM框架的主要组成结构：一个SLAM系统主要由**Visual Odometry**(**视觉里程计**，**VO**)，**Optimization**(**后端优化**),**Loop Closing**(**回环检测**), **Mapping**(**建图**)这四个部分组成。 
+MoShan et al[4]. introduced the application of VIO in MAV; Chen et al[5]. outlined the main applications of VO in SLAM mainly by traditional VO techniques, and also spent a subsection on the integration of deep learning and SLAM in general; in addition, the development of deep learning in SLAM was also discussed in the review by Li et al[6]. However, they mainly introduce the possible directions of deep learning in SLAM such as semantic SLAM, and do not describe the specific potential and methods of deep learning for VO applications; Lai et al[7]. provide a more systematic review of the combination of VSLAM and deep learning, summarize the advantages of the current use of deep learning to deal with SLAM problems, and list the advantages of VSLAM in recent years by applying Li et al[8]. provide a detailed overview of the evolution of VSLAM, but they focus on depth estimation and semantic map building, without a specific collation of VO. Wang et al[9]. give a comprehensive introduction to the methods and applications of deep learning in VO, and list the current problems in the field.
 
-![framework](framework.jpg)
+### I. Geometry-based Approaches
 
-<center> 图1 经典视觉SLAM框架 </center>
+The traditional implementation methods of VO mainly include the feature point method, direct method, and hybrid semi-direct tracking method.
 
-其中，VO能够通过相邻帧间的图像估计相机运动，并回复场景的空间结构。然而，仅仅有VO是不够的。VO其实就有点像马尔科夫链（Markov Chain）那样，只关注当前状态和未来状态的基本联系，不具有记忆性。这样一来，VO由于只有🐟的记忆，而每次的估计又会有一定偏差，每次估计的相机位姿运动偏差在机器人或者无人机运动过程中不断累加，形成累计偏移（**Accumulating Drift**）这些累计偏移有的时候会带来极为糟糕的后果。
+*A.* **Feature Point Method**
 
-如图2所示，设想一下，如果在估计的时候认为相机顺时针运动了90度，而实际上相机仅仅运动了89度，这样一来在一个空的矩形的房间里所作出的定位可能会因此不断远离相机的实际位置，而建立出来的地图也很可能会无法封闭。
+The feature point method is a representative method and an early attempt of VO. It can be compared to the principal component of an image, and the feature point method extracts the sparse representative information of the image and estimates the adjacent key frame motion of the whole image based on the overall motion of the feature points. Classical feature point extraction methods include the early Harris corner point[11], FAST corner point[12], and so on. These classical corner point recognition algorithms were proposed earlier and are not stable enough in the case of large image changes. Scale Invariant Feature Transform (SIFT)[13] is a classic algorithm that is robust to illumination, scale, and rotation. However, with the recognition effect comes a huge amount of computation, which makes it difficult for SLAM to meet its real-time requirements. To improve the speed of the algorithm operation, H. Bay et al. proposed Speeded Up Robust Features (SURF)[14] to reduce the computational effort in the SIFT integration process. However, both of these methods still require significant computational costs, and executing the computation in real-time may be challenging.
 
-![OIP-C](OIP-C.jpg)
+To reconcile accuracy, robustness, and computational effort, Rublee et al[15]. improved the BRIEF descriptor proposed by M. Calonder et al[16]. and addressed the direction invariance of FAST by proposing the oriented FAST and rotated BRIEF (ORB) descriptor. In 2015, based on Klein et al's Parallel Tracking and Mapping (PTAM)[17], R. Mur-Artal et al.[18] proposed a landmark solution: a robust and accurate real-time ORB-SLAM system. They later improved on this system with ORB-SLAM2[19], which further supported calibrated binocular and RGB-D cameras, and C. Campos et al. went on to introduce ORB3[20], which enriched the sub-maps to improve robustness and further incorporated IMU to enrich the calibration data.
 
-<center> 图2 逐渐增大的偏移和无法闭合的地图 </center>
+*B.* **Direct Method**
 
-因此，我们需要在一个更宏观的视角下审视并且修正这些偏移。这样就引入了**后端优化**和**回环检测**这两个部分。
+The feature point method is clear and straightforward, but there are still some problems. For example, even if the ORB speed is already quite fast, it still takes about 20ms[21], and if we want to do a 30-frame real-time SLAM, then we need each frame to be around 33ms on average. Thus, most of the time overhead is spent on feature point extraction. In addition, the image itself is discarded when feature points are used. Although feature points can reflect the image in a sense, an image has after all millions of pixels, and feature points are often only a few hundred, which may be difficult to reflect potentially useful image information in some cases. Meanwhile, in some occasions where feature points are not too significant, such as along the direction of a wall or an empty corridor, it is difficult to identify the camera movement by feature points alone. All these may pose related problems. That is, there is a certain relationship among them.
 
-在**后端优化**中，则需要考虑相对更加长远的目标：在解决“如何从图像估计相机运动”的基础上从带有噪声的数据中估计整个系统的状态，以及这个状态估计的不确定性有多大，同时使得得到的相机位姿在全局上尽可能保持一致。相比于VO部分，Optimization往往没有那么可见，面对的只有数据，而不必关心数据的来自于激光雷达还是单目相机，又在视觉里程计之后，因此叫做后端。但是还是要注意的是，这里的前后端和web应用（如J2EE中的Servlet）中的前后端有所不同，要分清楚两者之间的区别。
+Therefore, in some cases, the direct method may be more appropriate. In contrast to the feature point method, the direct method does not require a one-to-one match, and the projection is considered successful as long as the previous points have reasonable projection residuals in the current image: success depends mainly on the judgment of the depth of the map points and the camera pose, not on what the image looks like locally. The direct method saves a lot of time in feature extraction and matching is easily portable to embedded systems and can be integrated with IMUs, of which the LK optical flow technique[22] is a well-known approximate example. Since its introduction, the optical flow method has been continuously developed[23]. Direct methods like this seem to directly use image pixel grayscale information and geometric information to construct error functions by graphical optimization to minimize the cost function and thus obtain the best camera pose. In practice, Engel et al. proposed the large-scale direct monocular simultaneous localization and mapping (LSD-SLAM) algorithm[24] and applied it to a stereo camera, combining temporal and static stereo in a direct, real-time SLAM approach[25]. realistic conditions with some robustness considering also illumination variations. After this, Engel et al. further proposed DSO-SLAM[26].  however, its parameters in the code need to be adjusted to adapt to the new scene requirements each time the scene is changed in a dynamic environment, and there are problems such as scale drift in practical application scenarios.
 
-在**回环检测**部分，最主要判断的还是机器人或者无人机是否达到之前到过的位置，如果检测到了闭环（往往是通过图像相似度判断实现），就会把信息提供给后端进行处理来得到一个全局一致的估计。用一个不太准确但是我自己觉得非常形象的比喻来说，这个过程就像是用把一个个用小棍子（预测的轨迹）穿起来的珠子（估计的点）头尾相接到一起保持中间各个珠子距离不变一样。现阶段应用最广的回环检测方法是词袋模型（Bag-of-Words），之后会详细介绍。
+### Deep Learning Approaches
 
-下面将对VSLAM框架中的VO技术进行具体介绍。
+However, although geometry-based SLAM has been able to achieve CPU real-time in classical scenes, traditional, geometry-based SLAM methods still have some problems: for the feature point method, identifying feature points may encounter some difficulties in the case of insignificant features. In addition, additional arithmetic power is required to extract features, and these computations account for most of the entire VO process, and these feature points are discarded soon after matching, resulting in a large degree of waste; for the direct optical flow method, the assumption of constant features such as overall illumination of the rigid scene is required, and these are difficult to implement in scenes such as outdoors. Therefore, with the development of deep learning and its great advantages shown in visual recognition, many VOs incorporating deep learning have been proposed. Convolutional neural networks, a network structure, were the first to come into view due to their dominant level in object recognition and detection problems.
 
-### Visual Odometry
+#### **Review of Supervised Deep Learning**
 
-如上所述，Visual Odometry主要是计算图像帧之间 的相机位姿关系，也即通过拍摄图像，估计出相机的运行位置和姿态信息。根据所使用相机的类型，我们可以把VO分为单目VO和立体VO[^3]，其中单目VO主要使用单目相机来获取环境的2D信息；而立体VO如RGB-D相机和双目相机在获取画面外能够直接通过结构光或者ToF获取场景深度信息或通过计算获得的场景深度信息（类似人眼）
+In this context, Kendall et al[27]. proposed PoseNet capable of generating six degrees of freedom of a camera directly from a single RGB input image and was the first implementation of camera pose estimation. Since CNN extracts more powerful features than conventional feature detectors, the system can achieve high accuracy even under certain extreme conditions, such as strong illumination and blurred images. Later the authors improved PoseNet and also proposed improvements based on Bayesian analysis[28], which improved the accuracy of relocation; another direction of improvement by the authors was to improve the performance of PoseNet by using multi-view geometry as a source of training data[29]. Li et al[30]. extended PoseNet to accommodate color and depth inputs from RGB-D cameras using a dual-stream convolutional neural network, which showed robust performance in the face of challenging situations, becoming the first work to solve the deep CNN-based indoor relocation problem using RGB-D cameras. Wang et al[31]. proposed DeepVO, a recurrent convolutional neural network (RCNN)-based VO approach that is competitive with model-based VO approaches, as a notable advance.
 
-在实际操作中，由于RGB-D相机由于很容易受到自然光的干扰，同时对于噪声的鲁棒性较差，本身价格也比较高不利于推广，因此主要用于室内SLAM；而双目相机的精度和深度方向上的量程受到基线长度，也即两个相机间距离的影响（但是做的宽一个是容易形变导致误差，一个是相机太宽影响运动），同时disparity map的计算要消耗大量的资源，往往需要GPU或者FPGA来加速，在深度上的测量很难达到令人满意的效果。
+###  **Review of unsupervised or self-supervised Deep Learning**
 
-因此，单目相机SLAM技术便是这篇博客所要探讨的主要内容。在实践中，VO算法主要分为**特征点法**和**直接法**两类。
+All these above are the applications of supervised learning methods in VO: supervised learning methods tend to obtain better pose estimation results. However, SLAM is a niche area where it is often difficult and expensive to obtain real ground truth datasets in practice. It is difficult to build datasets suitable for large supervised learning and to label ground truth, while the number of available labeled datasets for supervised training is still limited. Li et al[32]. proposed a new monocular visual ranging (VO) system called UnDeepVO, which can achieve recovery of absolute scale. As an unsupervised approach, compared to DeepVO, UnDeepVO can be trained using a large number of unlabeled datasets to continuously improve its performance. Ummenhofer proposed DeMoN[33], which can simultaneously estimate camera self-motion, image depth, surface normals, and optical flow. Compared to popular single-image depth networks, DeMoN learns the concept of matching and thus can be better generalized to structures not seen during training. both DeMoN and UnDeepVO use stereo images to train the network to eliminate the important scale ambiguity problem in monocular V and are the first network models to use unsupervised learning methods to estimate the depth and pose of continuous images. The GANVO[34] proposed by Almalioglu et al. In contrast to traditional VO methods, pose and depth estimation does not require strict parameter tuning while being able to address the problem that traditional depth estimators based on autoencoder decoders tend to generate overly smooth images. However, unsupervised methods suffer from the drawback of insufficient supervisory information, so self-supervised algorithms by adding known image features as supervisory signals are also widely proposed. The D3VO self-supervised monocular depth estimation network proposed by Yang et al. tightly combines predicted depth, pose, and uncertainty into a direct visual ranging approach to enhance front-end tracking and back-end nonlinear optimization .e k can be analyzability, etc.
 
-**特征点法**是通过汇总图像中所有有代表性的点的移动来预测相机的整体移动情况。由于通过矩阵在整个图像的层面来判断运动是十分困难的（LK光流需要强假设），因此我们可以用另一种图像的表现形式，也就是图像的特征来描述图片，减少不必要的信息（特征也可以看作是图像的主成分）。尽管特征点在面对墙体或者其他角点不显著（salient）的区域时可能难以识别[^4]，但是在绝大多数场景下都能够找到充足的特征点来对帧间运动做出一个大致的估计。
+####  **Methods Comparison**
 
-传统的寻找特征点的方法主要包括Harris角点（参考BUAASE_CV_hw_set2）、FAST角点[^5]等，这些经典的角点识别算法提出的时间较早，在图像变化幅度较大的情况下不够稳定。近年来不断发展的局部特征识别往往不仅匹配角点（或者也可以说兴趣点）本身，还会为角点提供相应的描述子（descriptor）来说明特征点的朝向和大小等信息。例如，SIFT就是一个十分经典的算法，能够对关照、尺度以及旋转都有很好的鲁棒性。然而，随着识别效果而来的还有巨大的计算量。与SfM不同，SLAM要求实时性，因此在课上熟知的SIFT很少被应用到SLAM的实际应用中。
+As shown in Table 1, due to the rapid development of deep learning in VO applications in recent years, this paper collates the progress of the main network models according to the characteristics of different models. The collation criteria include five main dimensions to evaluate: the use of network structure, the type of training (supervised or not), the test dataset used, whether it is an end-to-end model, and the type of camera applied to the model.
 
-那么有没有什么能够协调好准确率、鲁棒性以及计算量，使之能够适配SLAM的算法呢？当然有！这就是在SLAM中大名鼎鼎的ORB-SLAM，如图所示，就像YOLO一样，ORB也更新了很多版，证明了其强大的生命力。
+TABLE I.  Characteristics of the major deep learning Visual Odometry models
 
-![image-20220630133322628](C:/Users/hyj/AppData/Roaming/Typora/typora-user-images/image-20220630133322628.png)
+| Name     | Structure     | Type            | Benchmark                                 | E2E  | Sensor |
+| -------- | ------------- | --------------- | ----------------------------------------- | ---- | ------ |
+| PoseNet  | CNN           | Supervised      | Cambridge Landmarks, 7 Scenes dataset[35] | Y    | Mono   |
+| DeepVO   | RCNN          | Supervised      | KITTI[36] Benchmark                       | Y    | Mono   |
+| D3VO     | DeepThingNet  | Self-supervised | KITTI & EuRoC[37]                         | N    | Mono   |
+| UndeepVO | RCNN          | Unsupervised    | KITTI  Benchmark                          | Y    | Mono   |
+| GANVO    | GAN           | Unsupervised    | KITTI & Cityscapes[38]                    | Y    | Mono   |
+| DeMoN    | Bootstrap Net | Supervised      | SUN3D[39] & MVS[40]                       | Y    | Mono   |
 
-<center> 图3 orb各个版本的论文（图源本人） </center>
+From the above table for the summary of influential models in recent years, it can be seen that due to the complexity and specificity of VO, the applied network structure has changed from the early CNN ruling the situation to the present blossoming; in addition, the number of available large-scale datasets in VO or SLAM is still limited due to the development of VO datasets suitable for deep learning slightly lagging behind the development of network models.
 
-ORB（Oriented FAST and Rotated BRIEF）,是目前最快速稳定的特征点检测和提取算法，许多图像拼接和目标追踪技术利用ORB特征进行实现[^6]。ORB-SLAM 是西班牙 Zaragoza 大学的 Raúl Mur-Arta 编写的视觉 SLAM 系统，目前开源在[raulmur/ORB_SLAM: A Versatile and Accurate Monocular SLAM (github.com)](https://github.com/raulmur/ORB_SLAM)上。正如GitHub上的md所述， ORB是一个通用高效的单目SLAM解决方案（后面的ORB2、ORB3支持了更多相机，但是这里先讨论单目的ORB）。
+As a result, unsupervised and self-supervised approaches have been emerging since 2017 and can obtain stronger generalization while maintaining accuracy. In addition, since neural networks can be likened to a black box, most applications have adopted an end-to-end model, i.e., replacing the process from feature extraction to camera pose estimation in traditional VO methods; in terms of the cameras used, thanks to the advantage of deep learning in reducing the estimated absolute depth, researchers in most application scenarios favor monocular cameras to reduce the cost and improve the generalization capability, researchers have favored monocular cameras in most applications to reduce costs and improve generalization capabilities.
 
-就像刚刚提到的，FAST角点以速度快而著称。已FAST-9为例，在像素点为中心的一个半径等于3像素的离散化的Bresenham圆找9个连续的像素点，如果它们们的像素值要么都比中心点加上一个阈值t大，要么都比中心点减去一个阈值t小，那么这个点就是一个角点。注意到FAST只用到了一个圆而没有具体的方向，事实上对于旋转缺乏鲁棒性；此外，由于它固定取半径为3的圆，因此存在尺度问题：可能一些在远处看是角点的位置放大后周围像素趋于一致而不再是角点了。ORB对FAST的改进或者拓展，主要是为其增加了其尺度不变性以及旋转不变性。
+###  Further Discussions
 
-尺度不变性主要是通过图像金字塔例如**Gaussian pyramid**向下采样（使用高斯核对其进行卷积，然后对卷积后的图像进行下采样，反复迭代），是一种从粗糙到不断精细的过程。图像金字塔是单个图像的多尺度表示法，由一系列原始图像的不同分辨率版本组成。金字塔的每个级别都由上个级别的图像下采样版本组成。下采样是指图像分辨率被降低，比如图像按照 1/2 比例下采样。因此一开始的 4x4 正方形区域现在变成 2x2 正方形。图像的下采样包含更少的像素，并且以 1/2 的比例降低大小。这样一来，上面提到的角点放大丢失的问题就能够得到解决。
+Since 2015, deep learning has been increasingly integrated with VO technology. Rich applications have sprung up based on traditional feature extraction or optical flow computation. However, the current research still has some possible problems. The next section will discuss the challenges faced and possible directions for development.
 
-![Image result for Gaussian pyramid](https://tse1-mm.cn.bing.net/th/id/OIP-C.yUkPZoP-jdQ22-n9QmnSQgHaGo?w=199&h=180&c=7&r=0&o=5&dpr=1.14&pid=1.7)
+#### **Challenges and Difficulties**
 
-<center> 图4 Gaussian pyramid 降采样 </center>
+Dynamic scenes and dynamic objects in the scenes. VO assumes that the environment is static to integrate the egomotion of the camera, however, the scenes in which VO is performed are likely to encounter dynamic objects, such as pedestrians, animals, etc.; in this regard, the illumination may change more drastically, for example, the illumination may not be uniformly distributed in outdoor environments.
 
-旋转不变性主要依靠ORB_SLAM的灰度质心法来处理：
+Deep learning is poorly interpretable, and because the training set cannot contain all scenes, the visual odometry trained by deep learning is often limited to certain specific scenes and performs poorly in some unfamiliar scenes.
 
-灰度质心法首先要选择某个图像块B然后将图像块B的矩m定义为
+Insufficient training data. In addition to the KITTI benchmark and Cityscapes datasets mentioned above, the mainstream VO datasets available include the RobotCar dataset[41], which contains different weather and scenery in the same location and was collected using a car driven in Oxford for a year. Also available is the previously mentioned EuRoc MAV dataset, which is a dataset that can be used for VO and VSLAM by collecting data through MAV. All of these datasets can be used for self-motion estimation, and the Cityscapes and KITTI datasets can also be used to complete scene segmentation. Although these training sets are relatively rich, they tend to be limited to certain scenes, for which overfitting may lead to a decrease in the model’s generalization ability and struggle to perform in some unfamiliar environments, which is exactly where VO tends to run.
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20200329170932906.png)
+####**Prospects and Directions**
 
-那么可以找到图像块B的质心C:
+Use semantic predictive feedback to reduce the interference of dynamic objects in the scene. Semantic segmentation of the scene is performed during image processing and the results of the semantic segmentation are used as a correction to modify the operation of the VO. For example, Barnes et al[42]. distinguish static and dynamic parts of the scene by integrating a per-pixel ad-hoc mask in the VO to determine unreliable regions in the image.
 
-![[公式]](https://www.zhihu.com/equation?tex=m_%7B00%7D+%3D+%5Csum_%7Bx%2C+y+%5Cin+B%7D+I+%28x%2C+y%29%2C+%5Cqquad+m_%7B10%7D+%3D+%5Csum_%7Bx%2C+y+%5Cin+B%7D+x+%2A+I+%28x%2C+y%29%2C+%5Cqquad+m_%7B01%7D+%3D+%5Csum_%7Bx%2C+y+%5Cin+B%7D+y+%2A+I+%28x%2C+y%29+%5C%5C+C+%3D+%5Cleft%28%5Cfrac%7Bm_%7B10%7D%7D%7Bm_%7B00%7D%7D%2C%5Cfrac%7Bm_%7B01%7D%7D%7Bm_%7B00%7D%7D%5Cright%29+%5Ctag%7B2%7D+)
+Unsupervised learning does not require much hard-to-label ground truth, and thus semi-supervised, self-supervised, or unsupervised methods can be used to reduce the requirement for training set labeling when the dataset is not fully developed.
 
-方向向量可以通过将图像块的几何中心和它的质心连接在一起得到，所以可以定义特征点的方向为：
+Fuse additional information such as IMU into the network structure for loss processing, while giving each other synchronization feedback, that is, in the direction of Deep VIO.
 
-![[公式]](https://www.zhihu.com/equation?tex=%5Ctheta+%3D+arctan%28%5Cfrac%7Bm_%7B01%7D%7D%7Bm_%7B10%7D%7D%29+%5Ctag%7B3%7D+)
+​	For the problem of poor model prediction improvement due to poor interpretability of deep learning, the degree of overfitting can be reduced by methods in artificial intelligence. Yang et al[43]. introduce the Bayesian distribution of weight factors to improve the generalization ability of network models in the prediction process and improve certain robustness for translation and rotation; they can also provide improved network structures to enhance the robustness for scenarios that do not appear in the training set and generalization.
 
-这样一来，FAST就有了尺度和方向的描述，就成为了Oriented FAST。
+###  Conclusions
 
-那么，有了关键点以后，我们就需要对每个点计算描述子。ORB中使用的描述子是Rotated BRIEF，是BRIEF的一种改进算法。BRIEF 是 Binary Robust Independent Elementary Features 的简称，它的作用是根据一组关键点创建二进制特征向量，又称为二进制特征描述符，是仅包含 1 和 0 的特征向量。在 BRIEF 中 每个关键点由一个二进制特征向量描述，该向量一般为 128-512 位的字符串，其中仅包含 1 和 0。由于向量中的每个值都是0或者1，因此BRIEF很适合用在像SLAM这样对实时性要求高同时资源又特别受限的技术上。BRIEF流程简单实时性较好，论文中生成512个描述子用时8.18ms[^6]，并且其描述子是二进制码，其匹配也比较快。但是，当BRIEF对于旋转过大时，比如超过30度时，匹配正确率迅速下降直到45度时为0。因此，和之前提到的FAST一样，BRIEF也不满足图像的尺度旋转不变性，因此，为使特征满足尺度不变性， Rotated BRIEF 算法同样**构建图像金字塔**。
+In this paper, we review the classical methods of VO, and on this basis, we make a brief arrangement and summary of the fusion and application of deep learning in VO in recent years. From the summary, we can see that compared with the traditional methods, the deep learning methods have good results in the case of very sparse or insignificant features. As deep learning continues to develop recognition capabilities in various visual tasks, research attention is increasingly turning toward deep learning and VO fusion. Despite the current shortcomings compared to clear solutions with geometry, they have shown great potential in various areas of VO applications.
 
-值得一提的是论文中提到的steered BRIEF 来增加其旋转不变性[^6]：所谓steered BRIEF就是对挑选出的点对加上一个旋转角度θ。对于任何一个特征点来说，它的BRIEF描述子是一个长度为𝑛的二值码串，这个二值码串是由特征点邻域𝑛个点对生成的。
+### Acknowledgment
 
-在代码实现的过程中我们可以使用OpenCV的库函数来辅助进行Oriented FAST的检测和BRIEF 描述子的计算。
+This work was inspired by **A brief survey of visual odometry for micro aerial vehicles** and other prominent works by professor ***\*Ben M. Chen\****.  Appreciation for the inspiration and guidance from his articles that motivated me to manage the research.
 
-```c++
-//-- 第一步:检测 Oriented FAST 角点位置
-  chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
-  detector->detect(img_1, keypoints_1);
-  detector->detect(img_2, keypoints_2);
+### References
 
-//-- 第二步:根据角点位置计算 BRIEF 描述子
-descriptor->compute(img_1, keypoints_1, descriptors_1);
-  descriptor->compute(img_2, keypoints_2, descriptors_2);
-  chrono::steady_clock::time_point t2 = chrono::steady_clock::now();
-  chrono::duration<double> time_used = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
-  cout << "extract ORB cost = " << time_used.count() << " seconds. " << endl;
+[1] Scaramuzza D, Fraundorfer F, Pollefeys M. Closing the loop in appearance-guided omnidirectional visual odometry by using vocabulary trees. Robot Auton Syst. 2010;58(6):820–827. doi: 10.1016/j.robot.2010.02.013.
 
-  Mat outimg1;
-  drawKeypoints(img_1, keypoints_1, outimg1, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
-  imshow("ORB features", outimg1);
+[2] D. Nister， O. Naroditsky, and J. Bergen， “Visual odometry”， Proc. Int. Conf. Computer Vision and Pattern Recognition， pp. 652-659， 2004.
 
-//当然，也可以自己实现一个版本
-void ComputeORB(const cv::Mat &img, vector<cv::KeyPoint> &keypoints, vector<DescType> &descriptors) {
-  const int half_patch_size = 8;
-  const int half_boundary = 16;
-  int bad_points = 0;
-  for (auto &kp: keypoints) {
-    if (kp.pt.x < half_boundary || kp.pt.y < half_boundary ||
-        kp.pt.x >= img.cols - half_boundary || kp.pt.y >= img.rows - half_boundary) {
-      // outside
-      bad_points++;
-      descriptors.push_back({});
-      continue;
-    }
+[3] D. Scaramuzza and F. Fraundorfer, "Visual odometry. part i: The rst 30 years and fundamentals”, IEEE Robot. Autom. Mag, vol. 18, pp. 8092, 2011.
 
-    float m01 = 0, m10 = 0;
-    for (int dx = -half_patch_size; dx < half_patch_size; ++dx) {
-      for (int dy = -half_patch_size; dy < half_patch_size; ++dy) {
-        uchar pixel = img.at<uchar>(kp.pt.y + dy, kp.pt.x + dx);
-        m10 += dx * pixel;
-        m01 += dy * pixel;
-      }
-    }
+[4] Mo Shan et al., "A brief survey of visual odometry for micro aerial vehicles," IECON 2016 - 42nd Annual Conference of the IEEE Industrial Electronics Society, 2016, pp. 6049-6054, doi: 10.1109/IECON.2016.7793198.
 
-    // angle should be arc tan(m01/m10);
-    float m_sqrt = sqrt(m01 * m01 + m10 * m10) + 1e-18; // avoid divide by zero
-    float sin_theta = m01 / m_sqrt;
-    float cos_theta = m10 / m_sqrt;
+[5] Y. Chen， Y. Zhou， Q. Lv and K. K. Deveerasetty， “A Review of V-SLAM”， 2018 IEEE International Conference on Information and Automation （ICIA）， 2018， pp. 603-608， doi： 10.1109/ICInfA.2018.8812387.
 
-    // compute the angle of this point
-    DescType desc(8, 0);
-    for (int i = 0; i < 8; i++) {
-      uint32_t d = 0;
-      for (int k = 0; k < 32; k++) {
-        int idx_pq = i * 32 + k;
-        cv::Point2f p(ORB_pattern[idx_pq * 4], ORB_pattern[idx_pq * 4 + 1]);
-        cv::Point2f q(ORB_pattern[idx_pq * 4 + 2], ORB_pattern[idx_pq * 4 + 3]);
+[6] A. Li， X. Ruan， J. Huang， X. Zhu and F. Wang， “Review of vision-based simultaneous Localization and Mapping，” 2019 IEEE 3rd Information Technology， Networking， Electronic and Automation Control Conference （ITNEC）， 2019， pp. 117-123， doi： 10.1109/ITNEC.2019.8729285.
 
-        // rotate with theta
-        cv::Point2f pp = cv::Point2f(cos_theta * p.x - sin_theta * p.y, sin_theta * p.x + cos_theta * p.y)
-                         + kp.pt;
-        cv::Point2f qq = cv::Point2f(cos_theta * q.x - sin_theta * q.y, sin_theta * q.x + cos_theta * q.y)
-                         + kp.pt;
-        if (img.at<uchar>(pp.y, pp.x) < img.at<uchar>(qq.y, qq.x)) {
-          d |= 1 << k;
-        }
-      }
-      desc[i] = d;
-    }
-    descriptors.push_back(desc);
-  }
-
-  cout << "bad/total: " << bad_points << "/" << keypoints.size() << endl;
-}
-```
-
-
-
-在取得了所有匹配好的点对后，就可以通过点对之间的关系来估计单目相机的运动，这部分由于涉及到大量的对极几何约束而且相关的代码都可以在OpenCV中找到，比如**cvFindFundamentalMat**和**findEssentialMat**等函数可以直接免去大量的理解，主要还是理清基本的三角测量原理和本质矩阵的应用，这里就不再过多展开了。
-
-![See the source image](https://ts1.cn.mm.bing.net/th/id/R-C.878c7f07c2baa8549cca6c58597d098e?rik=sUOIUk5zbJXukA&pid=ImgRaw&r=0)
-
-<center> 图5 三角测量原理和对极约束 </center>
-
-
-
-上述便是特征点法操作的主要流程。特征点法很清晰直接，但是还是有一些问题。例如，即使ORB速度已经相当快了，也仍然需要20ms的时长，如果想要做到一个30帧的实时SLAM，那么就需要每一帧在平均33ms左右。这样一来大部分的时间开销都会花在特征点的提取上。
-
-此外，使用特征点后，图像本身就被丢弃了。尽管特征点能够在某种意义上反映图像的情况，但是一张图像毕竟有十几万像素，而特征点往往只有几百个，在一些情况下可能难以反映可能有用的图像信息。
-
-同时，在一些特征点不是太显著的场合，比如沿着墙体的方向，或者是空无一物的走廊，单靠特征点很难识别出相机的运动。这些都有可能会带来相关的问题。
-
-因此，在一些情况下，直接法可能更加使用，其中一个主要的代表就是LSD-SLAM。相比于特征点法，直接法并不要求一一对应的匹配，只要先前的点在当前图像当中具有合理的投影残差，就认为这次投影是成功的：成功与否主要取决于对地图点深度以及相机位姿的判断，并不在于图像局部看起来是什么样子。直接法节省特征提取与匹配的大量时间，易于移植到嵌入式系统中，以及与IMU进行融合，其中LK光流技术就是一个著名的近似例子。
-
-
-
-### Lucas–Kanade光流
-
-Lucas–Kanade光流算法是一种两帧差分的光流估计算法。它由Bruce D. Lucas 和 Takeo Kanade提出[^7]。
-
-**Optical flow**, 或者说光流，是一种运动模式，这种运动模式指的是一个物体、表面、边缘在一个视角下由一个观察者（比如眼睛、摄像头等）和背景之间形成的明显移动。它计算两帧在时间t 到t + δt之间每个每个像素点位置的移动。 由于它是基于图像信号的泰勒级数，这种方法称为差分，这就是对于空间和时间坐标使用偏导数。 图像约束方程可以写为
-$$
-I (x ,y ,z,t ) = I (x + δx ,y + δy ,z + δz ,t + δt )
-$$
-其中，I(x, y,z, t) 为在（x,y,z）位置的体素。 我们假设移动足够的小，那么对图像约束方程使用泰勒公式，我们可以得到：
-
-![img](https://pic4.zhimg.com/80/v2-aa8060a6a519f61f51b9a1eede99314b_720w.jpg)
-
-忽略高阶无穷小项，可以得到：
-
-![img](https://pic3.zhimg.com/80/v2-800e00be3b3cfca9de37e5e1e3cc11d6_720w.jpg)
-
-利用滑动窗口可以得到一个超定方程，
-
-
-
-![image-20220630200833343](C:/Users/hyj/AppData/Roaming/Typora/typora-user-images/image-20220630200833343.png)
-
-使用最小二乘法求解就可以得到：
-
-![image-20220630200913212](C:/Users/hyj/AppData/Roaming/Typora/typora-user-images/image-20220630200913212.png)
-
-这也是进行估计的基础。此外，LK光流算法也可以通过前面提到的金字塔方法来进行优化，这样一来能够避免运动速度过快、图像整体结构发生变化等问题。
-
-在实现中，我们也可以使用高斯牛顿法来计算光流。核心函数如下（cpp）
-
-```cpp
-void OpticalFlowTracker::calculateOpticalFlow(const Range &range) {
-    // parameters
-    int half_patch_size = 4;
-    int iterations = 10;
-    for (size_t i = range.start; i < range.end; i++) {
-        auto kp = kp1[i];
-        double dx = 0, dy = 0; // dx,dy need to be estimated
-        if (has_initial) {
-            dx = kp2[i].pt.x - kp.pt.x;
-            dy = kp2[i].pt.y - kp.pt.y;
-        }
+[7] D. Lai， Y. Zhang 和 C. Li， “A Survey of Deep Learning Application in Dynamic Visual SLAM”， 2020 International Conference on Big Data & Artificial Intelligence & Software Engineering （ICBASE）， 2020， pp. 279-283， doi： 10.1109/ICBASE51474.2020.00065.
 
-        double cost = 0, lastCost = 0;
-        bool succ = true; // indicate if this point succeeded
+[8] Li, R., Wang, S. & Gu, D. Ongoing Evolution of Visual SLAM from Geometry to Deep Learning: Challenges and Opportunities. Cogn Comput 10, 875–889 (2018). https://doi.org/10.1007/s12559-018-9591-8
 
-        // Gauss-Newton iterations
-        Eigen::Matrix2d H = Eigen::Matrix2d::Zero();    // hessian
-        Eigen::Vector2d b = Eigen::Vector2d::Zero();    // bias
-        Eigen::Vector2d J;  // jacobian
-        for (int iter = 0; iter < iterations; iter++) {
-            if (inverse == false) {
-                H = Eigen::Matrix2d::Zero();
-                b = Eigen::Vector2d::Zero();
-            } else {
-                // only reset b
-                b = Eigen::Vector2d::Zero();
-            }
+[9] Wang, S. Ma, J. Chen, F. Ren and J. Lu, "Approaches, Challenges, and Applications for Deep Visual Odometry: Toward Complicated and Emerging Areas," in IEEE Transactions on Cognitive and Developmental Systems, vol. 14, no. 1, pp. 35-49, March 2022, doi: 10.1109/TCDS.2020.3038898.
 
-            cost = 0;
+[10] He, M., Zhu, C., Huang, Q. et al. A review of monocular visual odometry. Vis Comput 36, 1053–1065 (2020). https://doi.org/10.1007/s00371-019-01714-6
 
-            // compute cost and jacobian
-            for (int x = -half_patch_size; x < half_patch_size; x++)
-                for (int y = -half_patch_size; y < half_patch_size; y++) {
-                    double error = GetPixelValue(img1, kp.pt.x + x, kp.pt.y + y) -
-                                   GetPixelValue(img2, kp.pt.x + x + dx, kp.pt.y + y + dy);;  // Jacobian
-                    if (inverse == false) {
-                        J = -1.0 * Eigen::Vector2d(
-                            0.5 * (GetPixelValue(img2, kp.pt.x + dx + x + 1, kp.pt.y + dy + y) -
-                                   GetPixelValue(img2, kp.pt.x + dx + x - 1, kp.pt.y + dy + y)),
-                            0.5 * (GetPixelValue(img2, kp.pt.x + dx + x, kp.pt.y + dy + y + 1) -
-                                   GetPixelValue(img2, kp.pt.x + dx + x, kp.pt.y + dy + y - 1))
-                        );
-                    } else if (iter == 0) {
-                        // in inverse mode, J keeps same for all iterations
-                        // NOTE this J does not change when dx, dy is updated, so we can store it and only compute error
-                        J = -1.0 * Eigen::Vector2d(
-                            0.5 * (GetPixelValue(img1, kp.pt.x + x + 1, kp.pt.y + y) -
-                                   GetPixelValue(img1, kp.pt.x + x - 1, kp.pt.y + y)),
-                            0.5 * (GetPixelValue(img1, kp.pt.x + x, kp.pt.y + y + 1) -
-                                   GetPixelValue(img1, kp.pt.x + x, kp.pt.y + y - 1))
-                        );
-                    }
-                    // compute H, b and set cost;
-                    b += -error * J;
-                    cost += error * error;
-                    if (inverse == false || iter == 0) {
-                        // also update H
-                        H += J * J.transpose();
-                    }
-                }
+[11] C. Harris and M. Stephens, "A combined corner and edge detector", Proc. Alvey Vis. Conf., vol. 15, no. 50, pp. 5244, 1988.
 
-            // compute update
-            Eigen::Vector2d update = H.ldlt().solve(b);
+[12] Rosten, E., Drummond, T.: Machine learning for high-speed corner detection. In: European Conference on Computer Vision, pp. 430–443. Springer, Berlin (2006)
 
-            if (std::isnan(update[0])) {
-                // sometimes occurred when we have a black or white patch and H is irreversible
-                cout << "update is nan" << endl;
-                succ = false;
-                break;
-            }
+[13] D. G. Lowe, "Distinctive image features from scale-invariant keypoints", International Journal of Computer Vision (IJCV), vol. 60, no. 2, pp. 91-110, 2004.
 
-            if (iter > 0 && cost > lastCost) {
-                break;
-            }
+[14] H. Bay, A. Ess, T. Tuytelaars and L. V. Gool, "SURF: Speeded up robust features", Computer Vision and Image Understanding (CVIU), vol. 110, no. 3, pp. 346-359, 2008.
 
-            // update dx, dy
-            dx += update[0];
-            dy += update[1];
-            lastCost = cost;
-            succ = true;
+[15] Rublee, E., Rabaud, V., Konolige, K., Bradski, G.: ORB: an efficient alternative to SIFT or SURF. In: 2011 IEEE international conference on computer vision (ICCV), pp. 2564–2571. IEEE (2011)
 
-            if (update.norm() < 1e-2) {
-                // converge
-                break;
-            }
-        }
+[16] M. Calonder, V. Lepetit, C. Strecha, and P. Fua. Brief: Binary robust independent elementary features. In In European Conference on Computer Vision, 2010. 1, 2, 3, 5
 
-        success[i] = succ;
+[17] Klein, G., Murray, D.: Parallel tracking and mapping for small AR workspaces. In: 6th IEEE and ACM International Symposium on Mixed and Augmented Reality, 2007 (ISMAR 2007), pp. 225–234. IEEE (2007)
 
-        // set kp2
-        kp2[i].pt = kp.pt + Point2f(dx, dy);
-    }
-}
+[18] R. Mur-Artal, J. M. M. Montiel and J. D. Tardós, "ORB-SLAM: A Versatile and Accurate Monocular SLAM System," in IEEE Transactions on Robotics, vol. 31, no. 5, pp. 1147-1163, Oct. 2015, doi: 10.1109/TRO.2015.2463671.
 
-```
+[19] R. Mur-Artal and J. D. Tardós, "ORB-SLAM2: An Open-Source SLAM System for Monocular, Stereo, and RGB-D Cameras," in IEEE Transactions on Robotics, vol. 33, no. 5, pp. 1255-1262, Oct. 2017, doi: 10.1109/TRO.2017.2705103.
 
+[20] C. Campos, R. Elvira, J. J. G. Rodríguez, J. M. M. Montiel and J. D. Tardós, "ORB-SLAM3: An Accurate Open-Source Library for Visual, Visual–Inertial, and Multimap SLAM," in IEEE Transactions on Robotics, vol. 37, no. 6, pp. 1874-1890, Dec. 2021, doi: 10.1109/TRO.2021.3075644.
 
+[21] F. Endres, J. Hess, N. Engelhard, J. Sturm, D. Cremers and W. Burgard, "An evaluation of the RGB-D SLAM system," 2012 IEEE International Conference on Robotics and Automation, 2012, pp. 1691-1696, doi: 10.1109/ICRA.2012.6225199.
 
-需要注意的是，LK光流技术有一个较强的假设：要求图像的亮度恒定，就是同一点随着时间的变化，其亮度不会发生改变。因此，相比于SIFT等特征提取算法而言，LK的速度较快，但损失了一定的精度和鲁棒性，在具体使用的过程中还是要见仁见智。
+[22] B.D. Lucas and T. Kanade, "An iterative image registration technique with an application to stereo vision", Proc. DARPA Image Understanding Workshop, pp. 121-130, 1981.
 
+[23] Baker, S., Matthews, I.: Lucas-Kanade 20 years on: a unifying framework. Int. J. Comput. Vis. 56(3), 221–255 (2004)
 
+[24] Engel, J., Schöps, T., Cremers, D.: LSD-SLAM: large-scale direct monocular SLAM. In: European Conference on Computer Vision, pp. 834–849. Springer, Cham (2014)
 
-要想对SLAM有深入的研究，处理cv相关的代码能力外，也少不了扎实的数学基础。例如，四元数、李群李代数（尤其是SO(3)和SE(3)这些特殊的群)。同时，还需要有一定的图形学基础和非线性优化的能力。在不断探索的过程中，后端优化的Bundle Adjustment与Loop Closure都亟需丰富的统计学知识和实操上手的优化能力，不管是传统的KF、EKF还是流行的NLO，限于篇幅这篇博客不能一一揽括，因此就集中先把前端技术的思考记录下来，综合成一篇文字，以飨读者。
+[25] J. Engel, J. Stückler and D. Cremers, "Large-scale direct SLAM with stereo cameras," 2015 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), 2015, pp. 1935-1942, doi: 10.1109/IROS.2015.7353631.
 
+[26] J Engel, V Koltun, D Cremers et al., "Direct sparse odometry[J]", IEEE Transactions on Pattern Analysis and Machine Intelligence, vol. 40, no. 3, pp. 611, 2018.
 
+[27] A. Kendall, M. Grimes and R. Cipolla, "PoseNet: A Convolutional Network for Real-Time 6-DOF Camera Relocalization," 2015 IEEE International Conference on Computer Vision (ICCV), 2015, pp. 2938-2946, doi: 10.1109/ICCV.2015.336.
 
+[28] A. Kendall and R. Cipolla, "Modelling uncertainty in deep learning for camera relocalization", Proc. IEEE Int. Conf. Robot. Autom. (ICRA), pp. 4762-4769, May 2016.
 
+[29] A. Kendall and R. Cipolla, "Geometric loss functions for camera pose regression with deep learning", Proc. 30th IEEE Conf. Comput. Vis. Pattern Recognit. (CVPR), pp. 6555-6564, 2017.
 
+[30] R. Li, Q. Liu, J. Gui, D. Gu and H. Hu, "Indoor relocalization in challenging environments with dual-stream convolutional neural networks", IEEE Transactions on Automation Science and Engineering, 2017.
 
+[31] S. Wang， R. Clark， H. Wen 和 N. Trigoni， “DeepVO： Towards end-to-end visual odometertry with deep recurrent convolutional neural networks”， Robotics and Automation （ICRA） 2017 IEEE International Conference on， pp. 2043-2050， 2017.
 
-### Acknowledgements and References
+[32] R. Li, S. Wang, Z. Long and D. Gu, "UnDeepVO: Monocular Visual Odometry Through Unsupervised Deep Learning," 2018 IEEE International Conference on Robotics and Automation (ICRA), 2018, pp. 7286-7291, doi: 10.1109/ICRA.2018.8461251.
 
-[^1]: Liu H ,  Zhang G ,  Bao H . A survey of monocular simultaneous localization and mapping[J]. Journal of Computer-Aided Design & Computer Graphics, 2016.
-[^2]: Smith, Randall & Cheeseman, Peter. (1987). On the Representation and Estimation of Spatial Uncertainty. The International Journal of Robotics Research. 5. 10.1177/027836498600500404.
-[^3]: G. Yang, Y. Wang, J. Zhi, W. Liu, Y. Shao and P. Peng, "A Review of Visual Odometry in SLAM Techniques," *2020 International Conference on Artificial Intelligence and Electromechanical Automation (AIEA)*, 2020, pp. 332-336, doi: 10.1109/AIEA51086.2020.00075.
-[^4]: B. X. Hon, H. Tian, F. Wang, B. M. Chen and T. H. Lee, "A customized fastslam algorithm using scanning laser range finder in structured indoor environments," 2013 10th IEEE International Conference on Control and Automation (ICCA), 2013, pp. 640-645, doi: 10.1109/ICCA.2013.6565202.
-[^5]: Trajkovic, Miroslav & Hedley, Mark. (1998). Fast Corner Detection. Image and Vision Computing. 16. 75-87. 10.1016/S0262-8856(97)00056-5.
-[^6]: R. Mur-Artal, J. M. M. Montiel and J. D. Tardós, "ORB-SLAM: A Versatile and Accurate Monocular SLAM System," in IEEE Transactions on Robotics, vol. 31, no. 5, pp. 1147-1163, Oct. 2015, doi: 10.1109/TRO.2015.2463671.
-[^7]: Baker S , Matthews I . Lucas-Kanade 20 Years On: A Unifying Framework[J]. International Journal of Computer Vision, 2004, 56(3):221-255.
+[33] B. Ummenhofer， H. Zhou， J. Uhrig， N. Mayer， E. Ilg， A. Dosovitskiy， et al.， “DeMoN： Depth and Motion Network for learning monocular stereo”， Conference on Computer Vision and Pattern Recognition （CVPR）， 2017.
+
+[34] Y. Almalioglu, M. R. U. Saputra, P. P. B. d. Gusmão, A. Markham and N. Trigoni, "GANVO: Unsupervised Deep Monocular Visual Odometry and Depth Estimation with Generative Adversarial Networks," 2019 International Conference on Robotics and Automation (ICRA), 2019, pp. 5474-5480, doi: 10.1109/ICRA.2019.8793512.
+
+[35] J. Shotton, B. Glocker, C. Zach, S. Izadi, A. Criminisi and A. Fitzgibbon, "Scene coordinate regression forests for camera relocalization in RGB-D images", Computer Vision and Pattern Recognition (CVPR) 2013 IEEE Conference on, pp. 2930-2937, 2013.
+
+[36] Andreas Geiger, Philip Lenz and Raquel Urtasun, "Are we ready for autonomous driving? the KITTI vision benchmark suite", Conference on Computer Vision and Pattern Recognition (CVPR), 2012.
+
+[37] Michael Burri, Janosch Nikolic, Pascal Gohl, Thomas Schneider, Joern Rehder, Sammy Omari, et al., "The EuRoC micro aerial vehicle datasets", The International Journal of Robotics Research, 2016.
+
+[38] M. Cordts, M. Omran, S. Ramos, T. Rehfeld, M. Enzweiler, R. Benenson, et al., "The cityscapes dataset for semantic urban scene understanding", Proceedings of the IEEE conference on computer vision and pattern recognition, pp. 3213-3223, 2016.
+
+[39] J. Xiao， A. Owens and A. Torralba， “SUN3D： A Database of Big Spaces Reconstructed Using SfM and Object Labels”， IEEE International Conference on Computer Vision （ICCV），pp. 1625-1632， Dec. 2013.
+
+[40] S. Fuhrmann， F. Langguth and M. Goesele， “Mve-a multiview reconstruction environment”， Proceedings of the Eurographics Workshop on Graphics and Cultural Heritage （GCH）， vol. 6， pp. 8， 2014.
+
+[41] Maddern W, Pascoe G, Linegar C, Newman P. 1 Year, 1000km: the Oxford robotCar dataset. The International Journal of Robotics Research (IJRR) 2017;36(1):3–15.
+
+[42] D. Barnes, W. Maddern, G. Pascoe and I. Posner, "Driven to distraction: Self-supervised distractor learning for robust monocular visual odometry in urban environments", Proc. IEEE Int. Conf. Robot. Autom. (ICRA), pp. 1894-1900, 2018.
+
+[43] X. Yang, X. Li, Y. Guan, J. Song and R. Wang, "Overfitting reduction of pose estimation for deep learning visual odometry," in China Communications, vol. 17, no. 6, pp. 196-210, June 2020, doi: 10.23919/JCC.2020.06.016.
