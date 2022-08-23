@@ -5,7 +5,7 @@ show_date: true
 title:  A systematic overview for Visual Odometry of VSLAM
 date:   2022-06-30 19:13:20 UTC+8
 description: A systematic overview for Visual Odometry of VSLAM.
-img: posts/20220630/Learning_1000_points_per_iteration.jpg
+img: posts/20220630/VSLAMbanner.png
 tags: [machine learning, coding, neural networks]
 author: Armando Maynez
 github:  amaynez/Perceptron/
