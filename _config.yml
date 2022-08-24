@@ -1,5 +1,5 @@
 # Site settings
-title: Hyjcde's home
+title: Yijun Huang's Homepage
 description: 'Knowledge makes humble, ignorance makes proud.' # this means to ignore newlines until "baseurl:"
 permalink: ':title:output_ext'
 baseurl: "/hyjcde.github.io" # the subpath of your site, e.g. /blog
