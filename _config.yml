@@ -26,10 +26,9 @@ highlight_theme: syntax-base16.monokai.dark # select a dark theme for the code h
 # Author settings
 author: Huang Yijun # add your name
 author-pic: Myself_Neon_grey.jpg
-about-author: A third year undergraduate student major in Software Engineering of Beihang University. Research enthusiast. Current interest include Visual Odometry, Unmanned systems and Go game.
-
+about-author: A fourth-year undergraduate student taking Software Engineering at Beihang University. Also a cat curious for research. Current interests include Robotic Operating System, Gazebo Simulator and SLAM-related Algorithms. Enamored with building websites.
 # Contact links
-email: hyjcde@gmail.com # Add your Email address
+email: hyjcde@buaa.edu.cn # Add your Email address
 phone: 13960971312# Add your Phone number
 website: https://github.com/hyjcde # Add your website
 linkedin: hyjcde # Add your Linkedin handle
