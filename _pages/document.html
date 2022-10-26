@@ -1,24 +1,49 @@
 ---
 layout: menu-page
-title: Document
-permalink: document:output_ext
+title: Documents
+permalink: about:output_ext
 ---
 {% include calculate_relative_base.html %}
 {% include escape-404.html %}
 
 <div class="small-wrapper">
   <div class="about-container">
-    <h1>Review</h1>
-    <section style="margin-top:10vh; width: 60vw; height: 80vw; ">
+
+    <section class="about-body">
+      <ul class="contact-list">
+        {% if site.twitter %}
+        <li class="twitter"><a class="twitter" href="https://twitter.com/{{site.twitter}}" target="_blank"><i class="fa fa-twitter"></i></a></li>
+        {% endif %}
+        {% if site.linkedin %}
+        <li class="linkedin"><a class="linkedin" href="https://in.linkedin.com/in/{{site.linkedin}}" target="_blank"><i class="fa fa-linkedin"></i></a></li>
+        {% endif %}
+        {% if site.github %}
+        <li class="github"><a class="github" href="https://github.com/{{site.github}}" target="_blank"><i class="fa fa-github"></i></a></li>
+        {% endif %}
+        {% if site.email %}
+        <li class="email"><a class="email" href="mailto:{{site.email}}"><i class="fa fa-envelope-o"></i></a></li>
+        {% endif %}
+        {% if site.bandcamp %}
+        <li class="bandcamp"><a class="bandcamp" href="https://{{site.bandcamp}}.bandcamp.com" target="_blank"><i class="fa fa-bandcamp" aria-hidden="true"></i></a></li>
+        {% endif %}
+        {% if site.stackoverflow %}
+        <li class="stackoverflow"><a class="stackoverflow" href="https://stackoverflow.com/users/{{site.stackoverflow}}" target="_blank">
+          <i class="fa fa-stack-overflow" aria-hidden="true"></i></a></li>
+        {% endif %}
+      </ul>
+    </section> <!-- End About Body-->
+    <section style="margin-top:10vh; width: 33rem; height: 46rem; ">
+      <iframe src="/yjhuang_cv1021.pdf" width="100%" height="100%" style="">
+      </iframe>
+    </section>
+    <section style="margin-top:10vh; width: 33rem; height: 46rem; ">
       <iframe src="/review.pdf" width="100%" height="100%" style="">
       </iframe>
     </section>
-    <h1>You can access video through this page</h1>
-    <section style="margin-top:10vh;">
-      <iframe width="450" height="450"
-              src="https://www.youtube.com/watch?v=UJ3akL3gH68">
-      </iframe>
-    </section>
   </div> <!-- End About Container -->
+  updated:09/14/2022
 </div> <!-- End Small Wrapper -->
+
+
+
 
