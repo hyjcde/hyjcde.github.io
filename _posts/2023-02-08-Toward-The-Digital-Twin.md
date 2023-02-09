@@ -2,10 +2,10 @@
 layout: post
 read_time: true
 show_date: true
-title:  Database Review 0
+title:  On the trend towards the digital twin
 date:   2023-02-08 13:32:20 +0800
 description: The trend toward digital twin.
-img: posts/20220304/xinya_origin_unset.png
+img: posts/20230208/xinya_origin_unset.png
 tags: [digital twin, coding, unreal engine, cesium ion]
 author: Hyjcde
 github:  hyjcde/database-reviews/blob/main/DBRivision-0.md
