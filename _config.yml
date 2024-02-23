@@ -26,9 +26,9 @@ highlight_theme: syntax-base16.monokai.dark # select a dark theme for the code h
 # Author settings
 author: Huang Yijun # add your name
 author-pic: Myself_Neon_grey.jpg
-about-author: A fourth-year undergraduate student taking Software Engineering at Beihang University. Now dedicated in the research into software engineering for robotics for better end-user experience. Current interests include Robotic Operating System, model-driven engineering and SLAM-related Algorithms. Enamored with building websites and front-end technologies.
+about-author: Yijun Huang is a current Ph.D. student in the Department of Mechanical and Automation Engineering (MAE) at The Chinese University of Hong Kong (CUHK), where under the guidance of Prof. Ben M. Chen, he dedicates his research to the pioneering integration of Large Language Models (LLMs) and Artificial Intelligence Generated Content (AIGC) into digital twins.
 # Contact links
-email: hyjcde@buaa.edu.cn # Add your Email address
+email: yjhuang@link.cuhk.edu.hk # Add your Email address
 phone: 13960971312# Add your Phone number
 website: https://github.com/hyjcde # Add your website
 linkedin: hyjcde # Add your Linkedin handle
